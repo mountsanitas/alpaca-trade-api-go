@@ -680,7 +680,7 @@ func (c *Client) GetCalendar(start, end *string) ([]CalendarDay, error) {
 
 // ListOrders returns the list of orders for an account,
 // filtered by the input parameters.
-func (c *Client) ListOrders(status *string, until *time.Time, limit *int, nested *bool) ([]Order, error) {
+func (c *Client) ListOrders(status *string, after, until *time.Time, limit *int, nested *bool) ([]Order, error) {
 	urlString := fmt.Sprintf("%s/%s/orders", base, apiVersion)
 	if nested != nil {
 		urlString += fmt.Sprintf("?nested=%v", *nested)
@@ -694,6 +694,10 @@ func (c *Client) ListOrders(status *string, until *time.Time, limit *int, nested
 
 	if status != nil {
 		q.Set("status", *status)
+	}
+
+	if after != nil {
+		q.Set("after", after.Format(time.RFC3339))
 	}
 
 	if until != nil {
@@ -1033,8 +1037,8 @@ func GetCalendar(start, end *string) ([]CalendarDay, error) {
 // ListOrders returns the list of orders for an account,
 // filtered by the input parameters using the default
 // Alpaca client.
-func ListOrders(status *string, until *time.Time, limit *int, nested *bool) ([]Order, error) {
-	return DefaultClient.ListOrders(status, until, limit, nested)
+func ListOrders(status *string, after *time.Time, until *time.Time, limit *int, nested *bool) ([]Order, error) {
+	return DefaultClient.ListOrders(status, after, until, limit, nested)
 }
 
 // PlaceOrder submits an order request to buy or sell an asset
